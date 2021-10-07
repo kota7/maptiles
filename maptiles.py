@@ -110,6 +110,24 @@ def _get_extent(x1, x2, y1, y2, i1, i2, j1, j2, z):
     lat1 = _pixel_to_lat(y1*256+j1, z)
     lat2 = _pixel_to_lat(y2*256+j2+1, z)
     return lon1, lon2, lat1, lat2
+
+def _great_circle_distance(lon1, lon2, lat1, lat2, radius=6371):
+  # https://www.movable-type.co.uk/scripts/latlong.html
+  lat1, lat2, lon1, lon2 = math.radians(lat1), math.radians(lat2), math.radians(lon1), math.radians(lon2)
+  dlat, dlon = lat2 - lat1, lon2 - lon1
+  a = np.sin(dlat/2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon/2)**2
+  c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+  return radius * c
+
+def _estimate_aspect(lon1, lon2, lat1, lat2)-> float:
+    # Calculate the ratio of disance per degree (dist-per-lat/dist-per-lon)
+    lat_m = (lat1+lat2)/2
+    lon_m = (lon1+lon2)/2
+    # horizontal distance at the middle latitude
+    dist_lon = _great_circle_distance(lon1, lon2, lat_m, lat_m)
+    # vertical distance at the middle longitude
+    dist_lat = _great_circle_distance(lon_m, lon_m, lat1, lat2)
+    return abs(dist_lat / (lat2-lat1) * (lon2-lon1) / dist_lon)
 # ***   END OF MATH   ************************************************************************** #
 
 
@@ -143,6 +161,7 @@ def get_maparray(bounds: tuple, tile: Tile="osm", z: int=None):
         row = []
         for x in range(x1, x2+1):
             url = tile.baseurl.format(x=x, y=y, z=z)
+            #print(url)
             img = get_tileimage(url)
             row.append(np.asarray(img))
         out.append(np.concatenate(row, axis=1))
@@ -153,9 +172,11 @@ def get_maparray(bounds: tuple, tile: Tile="osm", z: int=None):
     extent = _get_extent(x1, x2, y1, y2, i1, i2, j1, j2, z)
     return out, extent
 
-def draw_map(bounds: tuple, tile: Tile="osm", z: int=None, ax=None, **kwargs):
+def draw_map(bounds: tuple, tile: Tile="osm", z: int=None, aspect="auto", ax=None, **kwargs):
     array, extent = get_maparray(bounds, tile, z)
-    opts = {"extent": extent}
+    if aspect=="auto":
+        aspect = _estimate_aspect(*bounds)
+    opts = {"extent": extent, "aspect": aspect}
     opts.update(kwargs)  # if extent is supplied, use it
     if ax is None:
         plt.imshow(array, **opts)
