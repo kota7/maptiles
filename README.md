@@ -11,19 +11,19 @@ Create map images and use as plot background.
 # from pypi
 $ pip3 install maptiles
 
-# from github
+# alternatively, from github
 $ git clone https://github.com/kota7/maptiles.git --depth 1
 $ pip3 install -U ./maptiles
 ```
 
+
+## Illustrative examples
 
 ```python
 import matplotlib.pyplot as plt
 from PIL import Image
 %matplotlib inline
 ```
-
-## Illustrative examples
 
 ### Map image on matplotlib axes
 
