@@ -11,7 +11,7 @@ Create map images and use as plot background.
 # from pypi
 $ pip3 install maptiles
 
-# from github
+# alternatively, from github
 $ git clone https://github.com/kota7/maptiles.git --depth 1
 $ pip3 install -U ./maptiles
 ```
