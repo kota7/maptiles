@@ -269,7 +269,16 @@ with sqlite3.connect(config.dbfile) as conn:
 print(data)
 ```
 
-    [('http://tiles.wmflabs.org/bw-mapnik/15/16383/10900.png',), ('http://tiles.wmflabs.org/bw-mapnik/15/16383/10901.png',), ('http://tiles.wmflabs.org/bw-mapnik/15/16384/10900.png',), ('http://tiles.wmflabs.org/bw-mapnik/15/16384/10901.png',), ('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/11/1812/807.jpg',), ('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/11/1812/808.jpg',), ('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/11/1812/809.jpg',), ('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/11/1813/807.jpg',), ('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/11/1813/808.jpg',), ('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/11/1813/809.jpg',)]
+    [('http://tiles.wmflabs.org/bw-mapnik/15/16383/10900.png',),
+     ('http://tiles.wmflabs.org/bw-mapnik/15/16383/10901.png',),
+     ('http://tiles.wmflabs.org/bw-mapnik/15/16384/10900.png',),
+     ('http://tiles.wmflabs.org/bw-mapnik/15/16384/10901.png',),
+     ('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/11/1812/807.jpg',),
+     ('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/11/1812/808.jpg',),
+     ('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/11/1812/809.jpg',),
+     ('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/11/1813/807.jpg',),
+     ('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/11/1813/808.jpg',),
+     ('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/11/1813/809.jpg',)]
 
 
 
