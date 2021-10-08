@@ -17,13 +17,13 @@ $ pip3 install -U ./maptiles
 ```
 
 
+## Illustrative examples
+
 ```python
 import matplotlib.pyplot as plt
 from PIL import Image
 %matplotlib inline
 ```
-
-## Illustrative examples
 
 ### Map image on matplotlib axes
 
