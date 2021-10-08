@@ -249,6 +249,32 @@ draw_map(bounds, ax=ax[1], tile=url)
 
 ## Implementation details
 
+
+### Coordinate Projection
+
+#### (longitude, latitude) to (Pixel Index)
+
+Longitude and latitude are converted to pixel index by the following formulas.
+
+```
+lonToPixel(x) = 2^(z+7) * (x/180 + 1)
+latToPixel(y) = 2^(z+7)/pi * ( -atanh(sin(pi*y/180)) + atanh(sin(pi*L/180)) )
+```
+
+These pixel indices are used to find the tile images corresponding to the coordinates, and also identify the locations within the image.
+The collected tile images are concatenated and cropped to form a single image as close as possible to the desired area.
+
+#### Current limitation
+
+We assume that, within the plotted area, the distance per longitude and the distance per latitude is constant.
+This is a legitimate assumption for longitude because its conversion formula is linear.
+Whereas, the formula for latitude is non-linear, and thus the distance per latitude changes by the location.
+This would be a negligible approximation for the visualization for the relatively small areas.
+The deviation may become an issue for a large plots, such as whole country or a continent.
+
+One way to solve this issue woule be to apply [axis scaling](https://matplotlib.org/stable/gallery/scales/custom_scale.html).
+This features is under development.
+
 ### Database
 
 - Downloaded image data are stored at the internal SQLite database at `config.dbfile`. The default location is `~/maptiles.db`.

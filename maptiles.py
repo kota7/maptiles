@@ -204,6 +204,16 @@ def _lat_to_pixel(lat: float, z: int)-> float:
     assert lat >= -L and lat <= L
     return 2**(z+7) / math.pi * (-math.atanh(math.sin(lat/180.0*math.pi)) + math.atanh(math.sin(math.pi/180.0*L)))
 
+# numpy version of latitude conversion
+# used for axis scaling
+def _lats_to_y(lats: np.array)-> np.array:
+    # latitudes in degree to web map y id
+    return -np.degrees(np.pi - np.log(np.tan(np.pi/4.0 + np.radians(lats)/2.0) + 1e-9)) / 2.0 * L / 90.0
+
+def _y_to_lats(y: np.array)-> np.array:
+    # inverse of _lats_to_y
+    return np.degrees(2.0*np.arctan(np.exp(np.pi-np.radians(-y*2.0/L*90.0))) - np.pi/2.0)
+
 # Convert WGS84 lon-lat to tile and within-tile index
 def _get_tile_index(lon: float, lat: float, z: int)-> tuple:
     p, q = _lon_to_pixel(lon, z), _lat_to_pixel(lat, z)
@@ -227,23 +237,25 @@ def _get_extent(x1, x2, y1, y2, i1, i2, j1, j2, z):
     #return lon1, lon2, lat1, lat2
     return lon1, lon2, lat2, lat1
 
-def _great_circle_distance(lon1, lat1, lon2, lat2, radius=6371):
-  # https://www.movable-type.co.uk/scripts/latlong.html
-  lat1, lat2, lon1, lon2 = math.radians(lat1), math.radians(lat2), math.radians(lon1), math.radians(lon2)
-  dlat, dlon = lat2 - lat1, lon2 - lon1
-  a = np.sin(dlat/2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon/2)**2
-  c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
-  return radius * c
+# def _great_circle_distance(lon1, lat1, lon2, lat2, radius=6371):
+#   # https://www.movable-type.co.uk/scripts/latlong.html
+#   lat1, lat2, lon1, lon2 = math.radians(lat1), math.radians(lat2), math.radians(lon1), math.radians(lon2)
+#   dlat, dlon = lat2 - lat1, lon2 - lon1
+#   a = np.sin(dlat/2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon/2)**2
+#   c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+#   return radius * c
 
-def _estimate_aspect(lon1, lat1, lon2, lat2)-> float:
-    # Calculate the ratio of disance per degree (dist-per-lat/dist-per-lon)
-    lat_m = (lat1+lat2)/2
-    lon_m = (lon1+lon2)/2
-    # horizontal distance at the middle latitude
-    dist_lon = _great_circle_distance(lon1, lat_m, lon2, lat_m)
-    # vertical distance at the middle longitude
-    dist_lat = _great_circle_distance(lon_m, lat1, lon_m, lat2)
-    return abs(dist_lat / (lat2-lat1) * (lon2-lon1) / dist_lon)
+# def _estimate_aspect(lon1, lat1, lon2, lat2)-> float:
+#     # Calculate the ratio of disance per degree (dist-per-lat/dist-per-lon)
+#     lat_m = (lat1+lat2)/2
+#     lon_m = (lon1+lon2)/2
+#     # horizontal distance at the middle latitude
+#     dist_lon = _great_circle_distance(lon1, lat_m, lon2, lat_m)
+#     print(dist_lon)
+#     # vertical distance at the middle longitude
+#     dist_lat = _great_circle_distance(lon_m, lat1, lon_m, lat2)
+#     print(dist_lat)
+#     return abs(dist_lat / (lat2-lat1) * (lon2-lon1) / dist_lon)
 # ***   END OF MATH   ************************************************************************** #
 
 
@@ -345,8 +357,12 @@ def draw_map(bounds: tuple, tile: Tile="osm", z: int=None, aspect="auto", use_ca
         kwargs   : Optional arguments passed to ax.imshow() or plt.imshow()
     """
     array, extent = get_maparray(bounds, tile, z, use_cache=use_cache)
+    if "extent" in kwargs:
+        extent = kwargs.pop("extent")
     if aspect=="auto":
-        aspect = _estimate_aspect(*bounds)
+        #aspect = _estimate_aspect(*bounds)
+        # adjust aspect so that the each pixel is a square of the same size
+        aspect = 1.0 * array.shape[0] / array.shape[1] * abs(extent[0]-extent[1]) / abs(extent[2]-extent[3]) 
     #print(extent)
     opts = {"extent": extent, "aspect": aspect}
     opts.update(kwargs)  # if extent is supplied, use it
@@ -354,5 +370,6 @@ def draw_map(bounds: tuple, tile: Tile="osm", z: int=None, aspect="auto", use_ca
         ax = plt.imshow(array, **opts)
         ax.axes.autoscale(enable=False)
     else:
+        #print(opts)
         ax.imshow(array, **opts)
         ax.autoscale(enable=False)
