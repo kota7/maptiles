@@ -21,5 +21,4 @@ setup(
     packages=[],
     py_modules=['maptiles'],
     install_requires=['requests', 'pillow', 'numpy', 'matplotlib']
-    #entry_points={'console_scripts': ['gdriveaudio=gdriveaudio:main']},
 )
