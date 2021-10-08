@@ -266,11 +266,11 @@ The collected tile images are concatenated and cropped to form a single image as
 
 #### Current limitation
 
-We assume that, within the plotted area, the distance per longitude and the distance per latitude is constant.
+We assume that, within the plotted area, the distance per longitude and the distance per latitude are constant for the entire map.
 This is a legitimate assumption for longitude because its conversion formula is linear.
 Whereas, the formula for latitude is non-linear, and thus the distance per latitude changes by the location.
-This would be a negligible approximation for the visualization for the relatively small areas.
-The deviation may become an issue for a large plots, such as whole country or a continent.
+This would be a negligible deviation for the visualization of relatively small areas.
+The deviation may become an issue for large plots, such as whole country or a continent.
 
 One way to solve this issue woule be to apply [axis scaling](https://matplotlib.org/stable/gallery/scales/custom_scale.html).
 This features is under development.
