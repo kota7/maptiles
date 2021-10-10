@@ -208,11 +208,12 @@ def _lat_to_pixel(lat: float, z: int)-> float:
 # used for axis scaling
 def _lats_to_y(lats: np.array)-> np.array:
     # latitudes in degree to web map y id
-    return -np.degrees(np.pi - np.log(np.tan(np.pi/4.0 + np.radians(lats)/2.0) + 1e-9)) / 2.0 * L / 90.0
+    #return -np.degrees(np.pi - np.log(np.tan(np.pi/4.0 + np.radians(lats)/2.0) + 1e-6)) / 2.0 * L / 90.0
+    return np.pi - np.arctanh(np.sin(np.radians(lats)))  # range is [0, to pi)
 
 def _y_to_lats(y: np.array)-> np.array:
     # inverse of _lats_to_y
-    return np.degrees(2.0*np.arctan(np.exp(np.pi-np.radians(-y*2.0/L*90.0))) - np.pi/2.0)
+    return np.degrees(np.arcsin(np.tanh(np.pi-y)))
 
 # Convert WGS84 lon-lat to tile and within-tile index
 def _get_tile_index(lon: float, lat: float, z: int)-> tuple:
@@ -325,7 +326,7 @@ def get_maparray(bounds: tuple, tile: Tile="osm", z: int=None, use_cache:bool =T
         row = []
         for x in xs:
             url = tile.baseurl.format(x=x, y=y, z=z)
-            #print(url)
+            print(url, file=sys.stderr)
             img = _get_tileimage(url, use_cache=use_cache)
             row.append(np.asarray(img))
         out.append(np.concatenate(row, axis=1))
