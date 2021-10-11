@@ -21,8 +21,8 @@ $ pip3 install -U ./maptiles
 ### Map image on matplotlib axes
 
 - `draw_map((lon1, lat1, lon2, lat2))` draws the map image of the specified rectangle behind the matplotlib axes.
-- Visualizations can be added further using the matplotlib features
-- Return value is a tuple of an `Axes` (the same object if `ax` argument is supplied) and `AxesImage` object of the map image.
+- The function returns a tuple of an `Axes` (the same object if `ax` argument is supplied) and `AxesImage` object of the map image.
+- Visualizations can be added further using the matplotlib features.
 
 **Remarks:**
 
