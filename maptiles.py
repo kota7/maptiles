@@ -14,6 +14,7 @@ import requests
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.scale import FuncScale
+import pyproj
 
 class config:
     dbfile = os.path.expanduser("~/maptiles.db")
@@ -197,7 +198,8 @@ def _lon_to_pixel(lon: float, z: int)-> float:
 
 def _lat_to_pixel(lat: float, z: int)-> float:
     assert lat >= -L and lat <= L
-    return 2**(z+7) / math.pi * (-math.atanh(math.sin(lat/180.0*math.pi)) + math.atanh(math.sin(math.pi/180.0*L)))
+    #return 2**(z+7) / math.pi * (-math.atanh(math.sin(lat/180.0*math.pi)) + math.atanh(math.sin(math.pi/180.0*L)))
+    return 2**(z+7) / math.pi * (math.pi-math.atanh(math.sin(lat/180.0*math.pi)))
 
 # numpy version of latitude conversion
 # used for axis scaling
@@ -226,13 +228,21 @@ def _pixel_to_lon(p: float, z: int)-> float:
     return 180.0 * (p/2.0**(z+7) - 1)
 
 def _pixel_to_lat(q: float, z: int)-> float:
-    return 180.0/math.pi * (math.asin(math.tanh(-math.pi/2**(z+7)*q + math.atanh(math.sin(math.pi/180.0*L)))))
+    #return 180.0/math.pi * (math.asin(math.tanh(-math.pi/2**(z+7)*q + math.atanh(math.sin(math.pi/180.0*L)))))
+    return 180.0/math.pi * (math.asin(math.tanh(-math.pi/2**(z+7)*q + math.pi)))
 
-def _get_extent(x1, x2, y1, y2, i1, i2, j1, j2, z):
+def _get_extent(x1, x2, y1, y2, i1, i2, j1, j2, z, crs="epsg:4326"):
     lon1 = _pixel_to_lon(x1*256+i1, z)
     lon2 = _pixel_to_lon(x2*256+i2+1, z)
     lat1 = _pixel_to_lat(y1*256+j1, z)
     lat2 = _pixel_to_lat(y2*256+j2+1, z)
+
+    crs = crs.lower()
+    if crs != "epsg:4326":
+        t = pyproj.Transformer.from_crs("epsg:4326", crs, always_xy=True)
+        lon1, lat1 = t.transform(lon1, lat1)
+        lon2, lat2 = t.transform(lon2, lat2)
+
     #return lon1, lon2, lat1, lat2
     return lon1, lon2, lat2, lat1
 
@@ -295,22 +305,34 @@ def _auto_zoom(lon1, lon2)-> int:
         # e.g. 350 to 20 --> -330 + 360 = 30
         width += 360 
     return round(math.log2(360*2.0) - math.log2(width))
-    
-def get_maparray(bounds: tuple, tile: Tile="osm", z: int=None, use_cache:bool =True)-> tuple:
+
+def _crs_from_str(s):
+    s = s.lower()
+    if s in ("lonlat", "wgs84", "epsg:4326"):
+        return "epsg:4326"
+    elif s in ("webmap", "web-mercator", "epsg:3857"):
+        return "epsg:3857"
+    else:
+        raise ValueError("'%' is not supported CRS string" % s)
+
+def get_maparray(bounds: tuple, tile: _Tile="osm", z: int=None, extent_crs="lonlat", use_cache:bool =True)-> tuple:
     """
     Draw map on matlotlib axes.
 
     Args:
-        bounds   : Tuple of floats (lon1, lat1, lon2, lat2), that defines the rectangle area to draw.
-        tile     : Str or _Tile object. 
-                    If str, must be either
-                    - One of the predefined tile ids. Use predefined_tiles() to see the available tiles.
-                    - Map url template with {x} {y} {z} parameters.
-                    See Tile() to generate a _Tile object.
-        z        : Zoome level. If None, heuristically chosen.
-        use_cache: Bool. If True, map images stored in the internal database are used. This helps to reduce the
+        bounds     : Tuple of floats (lon1, lat1, lon2, lat2), that defines the rectangle area to draw.
+        tile       : Str or _Tile object. 
+                     If str, must be either
+                      - One of the predefined tile ids. Use predefined_tiles() to see the available tiles.
+                      - Map url template with {x} {y} {z} parameters.
+                      See Tile() to generate a _Tile object.
+        z          : Zoome level. If None, heuristically chosen.
+        extent_crs : Str (case insensitive) indicating the coordinate reference system of the extent returned.
+                     - "lonlat", "wgs84" or "epsg:4326"        --> standard longitude, latitude in WGS84 system.
+                     - "webmap", "web-mercator" or "epsg:3857" --> indices in EPSG:3857 system (Web Mercator)
+        use_cache  : Bool. If True, map images stored in the internal database are used. This helps to reduce the
                     number of web requests to the map tile servers.
-        kwargs   : Optional arguments passed to ax.imshow() or plt.imshow()
+        kwargs     : Optional arguments passed to ax.imshow() or plt.imshow()
     
     Returns:
         Tuple of
@@ -359,10 +381,12 @@ def get_maparray(bounds: tuple, tile: Tile="osm", z: int=None, use_cache:bool =T
     i2b = 256*(x2-x1) + i2 + 1 
     out = out[j1:j2b, i1:i2b]
     # calculate extent of the resulted image
-    extent = _get_extent(x1, x2, y1, y2, i1, i2, j1, j2, z)
+    crs = _crs_from_str(extent_crs)
+    extent = _get_extent(x1, x2, y1, y2, i1, i2, j1, j2, z, crs=crs)
     return out, extent
 
-def draw_map(bounds: tuple, tile: Tile="osm", z: int=None, aspect="auto", scaling: bool=False,
+def draw_map(bounds: tuple, tile: Tile="osm", z: int=None, aspect="auto",
+             extent_crs="lonlat", scaling: bool=False,
              use_cache:bool =True, ax=None, **kwargs)-> tuple:
     """
     Draw map on matlotlib axes.
@@ -380,6 +404,9 @@ def draw_map(bounds: tuple, tile: Tile="osm", z: int=None, aspect="auto", scalin
                    If True, the map image is drawn on a twinx axes (with no scaling), 
                    and y-axis of the main axes will be scaled by web mercator with top and bottom latitude shared.
                    If False, the map image is drawn on the main axes. 
+        extent_crs : Str (case insensitive) indicating the coordinate reference system of the image extent.
+                     - "lonlat", "wgs84" or "epsg:4326"        --> standard longitude, latitude in WGS84 system.
+                     - "webmap", "web-mercator" or "epsg:3857" --> indices in EPSG:3857 system (Web Mercator)
         use_cache: Bool. If True, map images stored in the internal database are used. This helps to reduce the
                     number of web requests to the map tile servers.
         ax       : If given, map image is to drawn on this axes, and autoscale is disabled.
@@ -390,7 +417,8 @@ def draw_map(bounds: tuple, tile: Tile="osm", z: int=None, aspect="auto", scalin
         - Axes object
         - AxesImage object
     """
-    array, extent = get_maparray(bounds, tile, z, use_cache=use_cache)
+    array, extent = get_maparray(bounds, tile, z, use_cache=use_cache, extent_crs=extent_crs)
+    #print(extent)
     if "extent" in kwargs:
         extent = kwargs.pop("extent")
     if aspect=="auto":
@@ -418,10 +446,11 @@ def draw_map(bounds: tuple, tile: Tile="osm", z: int=None, aspect="auto", scalin
         # Apply web-mercator scale to the the main axes
         # with the same ylimit and aspect
         yscale = web_mercator_yscale(extent[2], extent[3])
-        ax.set_aspect(aspect, share=True)
         ax.set_yscale("function", functions=yscale)
-        ax.set_ylim((extent[2], extent[3]), auto=None)
+        ax.set_ylim((extent[2], extent[3]), auto=False)
+        ax.set_aspect(aspect, share=True)
     else:
         ax_img = ax.imshow(array, **opts)
+        ax.set_ylim((extent[2], extent[3]), auto=False)
     
     return ax, ax_img

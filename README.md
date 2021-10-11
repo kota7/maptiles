@@ -16,13 +16,13 @@ $ git clone https://github.com/kota7/maptiles.git --depth 1
 $ pip3 install -U ./maptiles
 ```
 
-
 ## Illustrative examples
 
 ### Map image on matplotlib axes
 
 - `draw_map((lon1, lat1, lon2, lat2))` draws the map image of the specified rectangle behind the matplotlib axes.
 - Visualizations can be added further using the matplotlib features
+- Return value is a tuple of an `Axes` (the same object if `ax` argument is supplied) and `AxesImage` object of the map image.
 
 **Remarks:**
 
@@ -130,12 +130,11 @@ img, extent = get_maparray(bounds)
 
 print(img.shape)
 print(extent)
-
 Image.fromarray(img)
 ```
 
     (338, 446, 3)
-    (-0.009226799011230469, 0.009913444519042969, 51.47197425351905, 51.48100872578421)
+    (-0.009226799011230469, 0.009913444519042969, 51.47197425351887, 51.481008725784044)
 
 
     Zoom level 15 is chosen
@@ -173,17 +172,20 @@ get_tile("osm")
 
 
 
-    Tile(name='OpenStreetMap, Standard', baseurl='https://tile.openstreetmap.org/{z}/{x}/{y}.png', copyright='© OpenStreetMap contributors', copywright_html='&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors')
+    Tile(name='OpenStreetMap, Standard',
+         baseurl='https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+         copyright='© OpenStreetMap contributors',
+         copywright_html='&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors')
 
 
 
 
 ```python
-# Royal observatory of Greenwich, again
-bounds = (-0.0092, 51.481, 0.0099, 51.472)
-fig, ax = plt.subplots(1, 2, figsize=(13, 5.2))
-draw_map(bounds, ax=ax[0], tile="google")   # tile name
-ax[0].set_title("Google Map")
+# Arc de Triomphe in Paris
+bounds = (2.2890830039978023, 48.87102408096251, 2.301185131072998, 48.87695157541353)
+fig, ax = plt.subplots(1, 2, figsize=(13, 6))
+draw_map(bounds, ax=ax[0], tile="google_streets")   # tile name
+ax[0].set_title("Google Street")
 
 draw_map(bounds, ax=ax[1], tile=get_tile("osm_bw")) # tile object
 ax[1].set_title("OpenStreetMap Black&White")
@@ -191,8 +193,8 @@ fig.tight_layout()
 None
 ```
 
-    Zoom level 15 is chosen
-    Zoom level 15 is chosen
+    Zoom level 16 is chosen
+    Zoom level 16 is chosen
 
 
 
@@ -294,8 +296,119 @@ None
 ![png](README_files/example_15_1.png)
     
 
+
+## Web Mercator projection
+
+- This package assumes that map tiles are [Web Mercator projected](https://en.wikipedia.org/wiki/Web_Mercator_projection).
+- The Web Mercator is a simplified version of Mercator projection and widely used by standard web maps currently, including the Google Map and OpenStreetMap.
+- The projection formula is the following:
+    $$
+    \begin{align}
+    x &= \frac{2^{z+7}}{\pi} (\lambda + \pi) \\
+    y &= \frac{2^{z+7}}{\pi} \left(\pi - \mathrm{tanh}^{-1}(\mathrm{sin}\; \phi)\right)
+    \end{align}
+    $$
+    where $\lambda, \phi$ are longitude and latitude in radians, and $x, y$ are pixel indices on the web map images.
+- Since the latitude conversion is non-linear, simply plotting (lon, lat) as (x, y) coordinates may deviate from the map already in the Web Mercator scale.
+- We may think of following three strategies to this issue:
+
+|    | Strategy                                                  | Pros                                         | Cons                                                           | Parameters to draw_map         |
+|----|-----------------------------------------------------------|----------------------------------------------|----------------------------------------------------------------|---------------------|
+| 1. | Plot lon-lat as-is on the same axes as image              | Simple, works okay for small maps            | Points deviate for large maps                                  |                     |
+| 2. | Plot lon-lat on a separate axes with Web-Mercator scaling | Can plot with lon-lat, works for large maps  | Harder to modify visuals due to multi-layer structure          | `scaling=True`        |
+| 3. | Plot after projecting coordinates to Web Mercator scale   | Single layer structure, works for large maps | Extra step for manual projection, axis grids are not intuitive | `extent_crs="webmap"` |
+
+- Strategy 1 is a simple solution and is recommended if the map area is small and approximation is accepted.
+- Strategy 2 works for large maps and coding syntax stays simple. Customization of the visuals can be harder because the image and main plot objects are on separate layers (axes) that share the same bounds.
+- Strategy 3 also works for large maps. Manual projection can be easily conducted using [pyproj](https://pypi.org/project/pyproj/) or [geopandas](https://pypi.org/project/geopandas/) libraries. The axis ticks are not intuitive, but one may add grid lines manually to achieve the desired visuals.
+- Examples below show how these strategies work on a small and a large map area.
+
+
+```python
+# Small map example
+# Giza's pyramid complex
+import pyproj
+bounds = [31.12743480300903, 29.9806997753276, 31.135662416839596, 29.971834892057622]
+pyramids = ([[31.133075952529907, 31.135404109954834, 31.135404109954834, 31.133075952529907, 31.133075952529907],
+             [29.978119871578528, 29.978119871578528, 29.980131892318944, 29.980131892318944, 29.978119871578528]], 
+            [[31.129621267318726, 31.129648089408878, 31.131879687309265, 31.131858229637146, 31.129621267318726],
+             [29.976925650617314, 29.97499720902611, 29.97501579659361, 29.976911710210015, 29.976925650617314]],
+            [[31.127794682979587, 31.128843426704407, 31.128843426704407, 31.127794682979587, 31.127794682979587],
+             [29.97205568264347, 29.97205568264347, 29.972931643919026, 29.972931643919026, 29.97205568264347]])
+def _plot_lines(ax, lines):
+    for p in lines:
+        ax.plot(p[0], p[1])
+
+fig, ax = plt.subplots(1, 3, figsize=(16, 6.4))
+
+draw_map(bounds, ax=ax[0], tile="google_satellite")
+_plot_lines(ax[0], pyramids)
+ax[0].set_title("Plot lon-lat as-is (Works fine for small maps)")
+
+draw_map(bounds, ax=ax[1], tile="google_satellite", scaling=True)
+_plot_lines(ax[1], pyramids)
+ax[1].set_title("Plot with Web Mercator scaling")
+
+draw_map(bounds, ax=ax[2], tile="google_satellite", extent_crs="webmap")
+t = pyproj.Transformer.from_crs("EPSG:4326", "EPSG:3857", always_xy=True)
+pyramids_scaled = [t.transform(p[0], p[1]) for p in pyramids]
+_plot_lines(ax[2], pyramids_scaled)
+ax[2].set_title("Plot after projecting to Web Mercator scale")
+
+fig.tight_layout()
+```
+
+    Zoom level 16 is chosen
+    Zoom level 16 is chosen
+    Zoom level 16 is chosen
+
+
+
+    
+![png](README_files/example_17_1.png)
     
 
+
+
+```python
+# Large map example
+# Country polygon data from the world bank https://datacatalog.worldbank.org/search/dataset/0038272
+# "World Country Polygons - Very High Definition"
+import geopandas as gpd
+df = gpd.read_file("WB_countries_Admin0_10m/WB_countries_Admin0_10m.shp")
+print(df.crs) # check that the data is in WGS84 or EPSG:4326 system
+australia = df[df.NAME_EN == "Australia"]
+bounds = (110, -9, 160, -55)
+
+fig, ax = plt.subplots(1, 3, figsize=(16, 6.2))
+
+draw_map(bounds, ax=ax[0])
+australia.plot(ax=ax[0], facecolor="none", aspect=None)
+ax[0].set_title("Plot lon-lat as-is (Large deviation for large maps)")
+
+draw_map(bounds, ax=ax[1], scaling=True)
+australia.plot(ax=ax[1], facecolor="none", aspect=None)
+ax[1].set_title("Plot with Web Mercator scaling")
+
+draw_map(bounds, ax=ax[2], extent_crs="webmap")
+australia.to_crs("EPSG:3857").plot(ax=ax[2], facecolor="none", aspect=None)
+ax[2].set_title("Plot after projecting to Web Mercator scale")
+
+fig.tight_layout()
+```
+
+    epsg:4326
+
+
+    Zoom level 4 is chosen
+    Zoom level 4 is chosen
+    Zoom level 4 is chosen
+
+
+
+    
+![png](README_files/example_18_2.png)
+    
 
 ## Implementation details
 
