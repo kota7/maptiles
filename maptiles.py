@@ -363,7 +363,7 @@ def get_maparray(bounds: tuple, tile: Tile="osm", z: int=None, use_cache:bool =T
     return out, extent
 
 def draw_map(bounds: tuple, tile: Tile="osm", z: int=None, aspect="auto",
-             use_cache:bool =True, ax=None, **kwargs):
+             use_cache:bool =True, ax=None, **kwargs)-> tuple:
     """
     Draw map on matlotlib axes.
 
@@ -380,6 +380,11 @@ def draw_map(bounds: tuple, tile: Tile="osm", z: int=None, aspect="auto",
                     number of web requests to the map tile servers.
         ax       : If given, map image is to drawn on this axes, and autoscale is disabled.
         kwargs   : Optional arguments passed to ax.imshow() or plt.imshow()
+    
+    Returns:
+        Tuple of two matplotlib Axes.
+        - Main axes (Web Mercator scaled)
+        - Image axes (No scaling)
     """
     array, extent = get_maparray(bounds, tile, z, use_cache=use_cache)
     if "extent" in kwargs:
@@ -412,4 +417,4 @@ def draw_map(bounds: tuple, tile: Tile="osm", z: int=None, aspect="auto",
     ax.set_yscale("function", functions=yscale)
     
     #ax.autoscale(enable=False)
-    return ax_img
+    return ax, ax_img

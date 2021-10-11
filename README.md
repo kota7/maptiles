@@ -19,23 +19,18 @@ $ pip3 install -U ./maptiles
 
 ## Illustrative examples
 
-```python
-import matplotlib.pyplot as plt
-from PIL import Image
-%matplotlib inline
-```
-
 ### Map image on matplotlib axes
 
-- `draw_map((lon1, lat1, lon2, lat2))` draws map image on the rectangle area on the matplotlib figure axes.
-- After drawing the map, one can add visualizations using the matplotlib features.
+- `draw_map((lon1, lat1, lon2, lat2))` draws the map image of the specified rectangle behind the matplotlib axes.
+- Visualizations can be added further using the matplotlib features
 
 **Remarks:**
 
 - Longitude and latitudes must be given in angles. Internally longitudes are converted to `[-180 to 180)` scale. Latitudes must be in `[-L, L]` with `L=85.0511287798`. This `L` is the north and south limit of Web Mercator projection.
 - Zoom level is automatically chosen by heuristic calculation. The `z` option allows for explicit specification.
 - Aspect ratio is automatically adjusted by heuristic calculation. The `aspect` option allows for explicit specification.
-- If `ax` is not given, then new axes is created internally.
+- If `ax` is not given, then a new axes is created internally.
+- The axes will be scaled by Web Mercator formula comaptible with the image.
 
 
 ```python
@@ -100,13 +95,13 @@ None
 ```python
 # Royal observatory of Greenwich
 bounds = (-0.0092, 51.481, 0.0099, 51.472)
-fig, ax = plt.subplots(figsize=(9, 9))
+fig, ax = plt.subplots(figsize=(9, 7.2))
 draw_map(bounds, ax=ax)
 
 observatory = (-0.0008717179298400879, 51.47732699342673)
 ax.scatter(*observatory, marker="x", s=200)
 ax.axvline(x=0, linestyle="dotted", linewidth=3, c="blue")
-ax.text(observatory[0], observatory[1]-0.0008, "Royal Observatory of Greenwich", ha="center",
+ax.text(observatory[0], observatory[1]-0.001, "Royal Observatory of Greenwich", ha="center",
         fontsize=20, bbox={"facecolor":"lightgreen", "alpha":0.75, "boxstyle":"round"})
 None
 ```
@@ -161,40 +156,24 @@ Image.fromarray(img)
 
 - This package defines a number of map tiles for the convenience.
 - The available tiles are given by the `predefined_tiles` function.
-- These names can be used as the `tile` option of the `draw_map` and `get_maparray` functions.
+- `get_tile` function returns the predefined tile object (a named tuple).
+- The `tile` option of `draw_map` and `get_maparray` accepts one of:
+    - Names of predefined tiles.
+    - URL string with `{z}`, `{x}`, `{y}` format parameters.
+    - Tile object.
 
 
 ```python
-from maptiles import predefined_tiles
+from maptiles import predefined_tiles, get_tile
 
 list(predefined_tiles().keys())
+get_tile("osm")
 ```
 
 
 
 
-    ['osm',
-     'osm_bw',
-     'osm_tonner',
-     'osm_tonner_hybrid',
-     'osm_tonner_labels',
-     'osm_tonner_lines',
-     'osm_tonner_backgrounds',
-     'osm_tonner_lite',
-     'japangsi',
-     'japangsi_pale',
-     'japangsi_blank',
-     'google',
-     'google_roads',
-     'google_streets',
-     'google_terrain',
-     'google_satellite',
-     'google_satellite_hybrid',
-     'google_h',
-     'google_r',
-     'google_t',
-     'google_s',
-     'google_y']
+    Tile(name='OpenStreetMap, Standard', baseurl='https://tile.openstreetmap.org/{z}/{x}/{y}.png', copyright='© OpenStreetMap contributors', copywright_html='&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors')
 
 
 
@@ -202,10 +181,11 @@ list(predefined_tiles().keys())
 ```python
 # Royal observatory of Greenwich, again
 bounds = (-0.0092, 51.481, 0.0099, 51.472)
-fig, ax = plt.subplots(1, 2, figsize=(15, 7))
-draw_map(bounds, ax=ax[0], tile="google")
+fig, ax = plt.subplots(1, 2, figsize=(13, 5.2))
+draw_map(bounds, ax=ax[0], tile="google")   # tile name
 ax[0].set_title("Google Map")
-draw_map(bounds, ax=ax[1], tile="osm_bw")
+
+draw_map(bounds, ax=ax[1], tile=get_tile("osm_bw")) # tile object
 ax[1].set_title("OpenStreetMap Black&White")
 fig.tight_layout()
 None
@@ -221,20 +201,88 @@ None
     
 
 
-### Custom tiles
+### Copyrights of the map tiles
 
-- Other tiles can be specified by a URL string with `{x}`, `{y}`, `{z}` parameters.
+- This package only provides an interface to access and parse data from map tile servers.
+- The map data belong to the providers and they shall be used in compliant with their term of usage.
+- Examples of copyright messages are given for predefined tiles (Note: not official one).
+- Use `get_tile` function to use them.
 
 
 ```python
+from IPython.core.display import HTML
+
+tile = get_tile("osm")
+print(tile.copyright)
+display(HTML(tile.copywright_html))
+
+tile = get_tile("japangsi")
+print(tile.copyright)
+display(HTML(tile.copywright_html))
+
+tile = get_tile("google")
+print(tile.copyright)
+display(HTML(tile.copywright_html))
+```
+
+    © OpenStreetMap contributors
+
+
+
+&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors
+
+
+    © 国土地理院 | Geospatial Information Authority of Japan
+
+
+
+&copy; <a href="https://maps.gsi.go.jp/development/ichiran.html">国土地理院 | Geospatial Information Authority of Japan</a>
+
+
+    © Google
+
+
+
+&copy; <a href="https://google.com">Google</a>
+
+
+
+```python
+# Add copyright message to the plot
+bounds = [-20, 40, 55, -40]
+tile = get_tile("osm")
+fig, ax = plt.subplots(figsize=(7, 8.5))
+draw_map(bounds, ax=ax, tile=tile)
+bottom, right = ax.get_ylim()[0], ax.get_xlim()[1]
+ax.text(right, bottom, tile.copyright, ha="right", va="bottom")
+None
+```
+
+    Zoom level 3 is chosen
+
+
+
+    
+![png](README_files/example_13_1.png)
+    
+
+
+### Custom tiles
+
+- Any tile following the OSM's naming rule can be specified by a URL string with `{x}`, `{y}`, `{z}` parameters.
+- Alternatively, a tile object can be created with the `Tile` function.
+
+
+```python
+from maptiles import Tile
+
 # Mount Fuji, Japan
 bounds = [138.53553771972656, 35.48024245154482, 138.9276123046875, 35.231598543453316]
-fig, ax = plt.subplots(1, 2, figsize=(15, 10))
+fig, ax = plt.subplots(1, 2, figsize=(15, 5.6))
 
-draw_map(bounds, ax=ax[0], tile="japangsi")
-
-url = "https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg"
-draw_map(bounds, ax=ax[1], tile=url)
+draw_map(bounds, ax=ax[0], tile="https://cyberjapandata.gsi.go.jp/xyz/english/{z}/{x}/{y}.png")
+draw_map(bounds, ax=ax[1], tile=Tile("https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg"))
+None
 ```
 
     Zoom level 11 is chosen
@@ -243,7 +291,9 @@ draw_map(bounds, ax=ax[1], tile=url)
 
 
     
-![png](README_files/example_12_1.png)
+![png](README_files/example_15_1.png)
+    
+
     
 
 
@@ -263,17 +313,6 @@ latToPixel(y) = 2^(z+7)/pi * ( -atanh(sin(pi*y/180)) + atanh(sin(pi*L/180)) )
 
 These pixel indices are used to find the tile images corresponding to the coordinates, and also identify the locations within the image.
 The collected tile images are concatenated and cropped to form a single image as close as possible to the desired area.
-
-#### Current limitation
-
-We assume that, within the plotted area, the distance per longitude and the distance per latitude are constant for the entire map.
-This is a legitimate assumption for longitude because its conversion formula is linear.
-Whereas, the formula for latitude is non-linear, and thus the distance per latitude changes by the location.
-This would be a negligible deviation for the visualization of relatively small areas.
-The deviation may become an issue for large plots, such as whole country or a continent.
-
-One way to solve this issue woule be to apply [axis scaling](https://matplotlib.org/stable/gallery/scales/custom_scale.html).
-This features is under development.
 
 ### Database
 
