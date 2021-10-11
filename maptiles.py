@@ -362,7 +362,7 @@ def get_maparray(bounds: tuple, tile: Tile="osm", z: int=None, use_cache:bool =T
     extent = _get_extent(x1, x2, y1, y2, i1, i2, j1, j2, z)
     return out, extent
 
-def draw_map(bounds: tuple, tile: Tile="osm", z: int=None, aspect="auto",
+def draw_map(bounds: tuple, tile: Tile="osm", z: int=None, aspect="auto", scaling: bool=False,
              use_cache:bool =True, ax=None, **kwargs)-> tuple:
     """
     Draw map on matlotlib axes.
@@ -376,6 +376,10 @@ def draw_map(bounds: tuple, tile: Tile="osm", z: int=None, aspect="auto",
                     See Tile() to generate a _Tile object.
         z        : Zoome level. If None, heuristically chosen.
         aspect   : Aspect ratio (lat / lon). If "auto", heuristically chosen.
+        scaling  : Bool that indicates if the y-axis should be scaled by web mercator projection.
+                   If True, the map image is drawn on a twinx axes (with no scaling), 
+                   and y-axis of the main axes will be scaled by web mercator with top and bottom latitude shared.
+                   If False, the map image is drawn on the main axes. 
         use_cache: Bool. If True, map images stored in the internal database are used. This helps to reduce the
                     number of web requests to the map tile servers.
         ax       : If given, map image is to drawn on this axes, and autoscale is disabled.
@@ -383,8 +387,8 @@ def draw_map(bounds: tuple, tile: Tile="osm", z: int=None, aspect="auto",
     
     Returns:
         Tuple of two matplotlib Axes.
-        - Main axes (Web Mercator scaled)
-        - Image axes (No scaling)
+        - Axes object
+        - AxesImage object
     """
     array, extent = get_maparray(bounds, tile, z, use_cache=use_cache)
     if "extent" in kwargs:
@@ -393,28 +397,31 @@ def draw_map(bounds: tuple, tile: Tile="osm", z: int=None, aspect="auto",
         #aspect = _estimate_aspect(*bounds)
         # adjust aspect so that the each pixel is a square of the same size
         aspect = 1.0 * array.shape[0] / array.shape[1] * abs(extent[0]-extent[1]) / abs(extent[2]-extent[3]) 
+
     #print(extent)
-    opts = {"extent": extent, "aspect": aspect}
-    opts.update(kwargs)  # if extent is supplied, use it
-    if ax is None:
+    if ax is None:        
         ax = plt.gca()
         #print(opts)
     
-    # add another axes for showing the image
-    ax2 = ax.twinx()
-    ax_img = ax2.imshow(array, **opts)
-    ax2.yaxis.set_visible(False)
+    opts = {"extent": extent, "aspect": aspect}
+    opts.update(kwargs)  # if extent and/or aspect is supplied, replace
+    if scaling:
+        # add another axes only for drawing the image
+        ax2 = ax.twinx()
+        ax_img = ax2.imshow(array, **opts)
+        ax2.yaxis.set_visible(False)
 
-    # move the main axes to the top layer and its patch invisible
-    ax.set_zorder(ax2.get_zorder() + 1)
-    ax.patch.set_visible(False)
+        # move the main axes to the top layer and its patch invisible
+        ax.set_zorder(ax2.get_zorder() + 1)
+        ax.patch.set_visible(False)
 
-    # Then rescale the main axis to web-mercator scale
-    # with the same ylimit and aspect
-    yscale = web_mercator_yscale(bounds[1], bounds[3])
-    ax.set_ylim(extent[2], extent[3])
-    ax.set_aspect(aspect)
-    ax.set_yscale("function", functions=yscale)
+        # Apply web-mercator scale to the the main axes
+        # with the same ylimit and aspect
+        yscale = web_mercator_yscale(extent[2], extent[3])
+        ax.set_aspect(aspect, share=True)
+        ax.set_yscale("function", functions=yscale)
+        ax.set_ylim((extent[2], extent[3]), auto=None)
+    else:
+        ax_img = ax.imshow(array, **opts)
     
-    #ax.autoscale(enable=False)
     return ax, ax_img
