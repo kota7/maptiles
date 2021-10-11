@@ -13,6 +13,7 @@ from PIL import Image
 import requests
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.scale import FuncScale
 
 class config:
     dbfile = os.path.expanduser("~/maptiles.db")
@@ -75,108 +76,99 @@ def Tile(baseurl, name=None, copyright=None, copywright_html=None):
     return _Tile(name=name, baseurl=baseurl, copyright=copyright, copywright_html=copywright_html)
 
 class _tiles:
+
     # OpenStreetMap
     # https://wiki.openstreetmap.org/wiki/Tile_servers
+    _osm_copyright = ("\u00a9 OpenStreetMap contributors",
+                      '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors')
+
     osm = Tile(
-        "https://tile.openstreetmap.org/{z}/{x}/{y}.png", 
+        "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
         "OpenStreetMap, Standard",
-        "(c) OpenStreetMap contributors",
-        '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors')
+        *_osm_copyright)
     osm_bw = Tile(
         "http://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png", 
         "OpenStreetMap, Black&White",
-        "(c) OpenStreetMap contributors",
-        '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors')
+        *_osm_copyright)
     osm_tonner = Tile(
         "http://tile.stamen.com/toner/{z}/{x}/{y}.png", 
         "OpenStreetMap, Toner",
-        "(c) OpenStreetMap contributors",
-        '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors')
+        *_osm_copyright)
     osm_tonner_hybrid = Tile(
         "http://tile.stamen.com/toner-hybrid/{z}/{x}/{y}.png", 
         "OpenStreetMap, Toner Hybrid",
-        "(c) OpenStreetMap contributors",
-        '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors')
+        *_osm_copyright)
     osm_tonner_labels = Tile(
         "http://tile.stamen.com/toner-labels/{z}/{x}/{y}.png", 
         "OpenStreetMap, Toner Labels",
-        "(c) OpenStreetMap contributors",
-        '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors')
+        *_osm_copyright)
     osm_tonner_lines = Tile(
         "http://tile.stamen.com/toner-lines/{z}/{x}/{y}.png", 
         "OpenStreetMap, Toner Lines",
-        "(c) OpenStreetMap contributors",
-        '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors')
+        *_osm_copyright)
     osm_tonner_backgrounds = Tile(
         "http://tile.stamen.com/toner-backgrounds/{z}/{x}/{y}.png", 
         "OpenStreetMap, Toner Backgrounds",
-        "(c) OpenStreetMap contributors",
-        '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors')
+        *_osm_copyright)
     osm_tonner_lite = Tile(
         "http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png", 
         "OpenStreetMap, Toner Lite",
-        "(c) OpenStreetMap contributors",
-        '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors')
+        *_osm_copyright)
     osm_tonner_lite = Tile(
         "http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png", 
         "OpenStreetMap, Toner Lite",
-        "(c) OpenStreetMap contributors",
-        '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors')
+        *_osm_copyright)
     osm_tonner_lite = Tile(
         "http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png", 
         "OpenStreetMap, Toner Lite",
-        "(c) OpenStreetMap contributors",
-        '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors')
+        *_osm_copyright)
 
     # Geospatial Information Authority of Japan
     # https://maps.gsi.go.jp/development/ichiran.html
+    _japangsi_copyright = (
+        "\u00a9 国土地理院 | Geospatial Information Authority of Japan",
+        '&copy; <a href="https://maps.gsi.go.jp/development/ichiran.html">国土地理院 | Geospatial Information Authority of Japan</a>')
+
     japangsi = Tile(
         "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png",
         "Geospatial Information Authority of Japan, Standard",
-        "(c) 国土地理院 | Geospatial Information Authority of Japan",
-        '$copy; <a hfref="https://maps.gsi.go.jp/development/ichiran.html">国土地理院 | Geospatial Information Authority of Japan</a>')
+        *_japangsi_copyright)
     japangsi_pale = Tile(
         "https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png",
         "Geospatial Information Authority of Japan, Pale",
-        "(c) 国土地理院 | Geospatial Information Authority of Japan",
-        '$copy; <a hfref="https://maps.gsi.go.jp/development/ichiran.html">国土地理院 | Geospatial Information Authority of Japan</a>')
+        *_japangsi_copyright)
     japangsi_blank = Tile(
         "https://cyberjapandata.gsi.go.jp/xyz/blank/{z}/{x}/{y}.png"
         "Geospatial Information Authority of Japan, Blank",
-        "(c) 国土地理院 | Geospatial Information Authority of Japan",
-        '$copy; <a hfref="https://maps.gsi.go.jp/development/ichiran.html">国土地理院 | Geospatial Information Authority of Japan</a>')
+        *_japangsi_copyright)
+
     # Google Maps
     # ToDo: check copyright information
+    _google_copyright = ("\u00a9 Google", '&copy; <a href="https://google.com">Google</a>')
     google = Tile(
         "https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}",
         "Google Map",
-        "(c) Google",
-        '$copy; <a hfref="https://google.com">Google</a>')
+        *_google_copyright)
     google_roads = Tile(
         "https://mt1.google.com/vt/lyrs=h&x={x}&y={y}&z={z}",
         "Google Map, Road",
-        "(c) Google",
-        '$copy; <a hfref="https://google.com">Google</a>')
+        *_google_copyright)
     google_streets = Tile(
         "https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}",
         "Google Map, Streets",
-        "(c) Google",
-        '$copy; <a hfref="https://google.com">Google</a>')
+        *_google_copyright)
     google_terrain = Tile(
         "https://mt1.google.com/vt/lyrs=t&x={x}&y={y}&z={z}",
         "Google Map, Terrain",
-        "(c) Google",
-        '$copy; <a hfref="https://google.com">Google</a>')
+        *_google_copyright)
     google_satellite = Tile(
         "https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
         "Google Map, Satellite",
-        "(c) Google",
-        '$copy; <a hfref="https://google.com">Google</a>')
+        *_google_copyright)
     google_satellite_hybrid = Tile(
         "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
         "Google Map, Satellite Hybrid",
-        "(c) Google",
-        '$copy; <a hfref="https://google.com">Google</a>')
+        *_google_copyright)
     # alias
     google_h = google_roads
     google_r = google_streets
@@ -187,6 +179,9 @@ class _tiles:
 def predefined_tiles():
     out = vars(_tiles)
     return {key:value for key, value in out.items() if type(value)==_Tile}
+
+def get_tile(name: str)-> _Tile:    
+    return predefined_tiles().get(name, None)
 # ***   END OF TILES   ********************************************************************** #
 
 
@@ -207,9 +202,12 @@ def _lat_to_pixel(lat: float, z: int)-> float:
 # numpy version of latitude conversion
 # used for axis scaling
 def _lats_to_y(lats: np.array)-> np.array:
-    # latitudes in degree to web map y id
+    # latitudes in degree to web map y id, unscaled
     #return -np.degrees(np.pi - np.log(np.tan(np.pi/4.0 + np.radians(lats)/2.0) + 1e-6)) / 2.0 * L / 90.0
-    return np.pi - np.arctanh(np.sin(np.radians(lats)))  # range is [0, to pi)
+    lats = np.asarray(lats)     # robust just in case a list is given
+    lats[np.isinf(lats)] = 0    # both inf, -inf to 0, to avoid runtime warnings
+    #print(np.unique(rad))
+    return np.pi - np.arctanh(np.sin(np.radians(lats)))
 
 def _y_to_lats(y: np.array)-> np.array:
     # inverse of _lats_to_y
@@ -257,6 +255,31 @@ def _get_extent(x1, x2, y1, y2, i1, i2, j1, j2, z):
 #     dist_lat = _great_circle_distance(lon_m, lat1, lon_m, lat2)
 #     print(dist_lat)
 #     return abs(dist_lat / (lat2-lat1) * (lon2-lon1) / dist_lon)
+class WebMercatorLatitudeScale:
+    """
+    Axis scaler to project latitudes to the web mercator scale
+    For plotting compatibility
+    """
+    def __init__(self, top: float, bottom: float):
+        self.top = top
+        self.bottom = bottom
+        ylim = _lats_to_y([top, bottom])
+        #print(ylim)
+        self.slope = (top-bottom)/(ylim[0]-ylim[1])
+        self.const = self.top - self.slope * ylim[0]
+        #print(self.slope, self.const)
+    
+    def forward(self, lats):
+        return self.const + self.slope* _lats_to_y(lats)
+    
+    def inverse(self, y):
+        return _y_to_lats((y-self.const)/self.slope)
+
+def web_mercator_yscale(top: float, bottom: float):
+    s = WebMercatorLatitudeScale(top, bottom)
+    return (s.forward, s.inverse)
+# alias. this could be more intuitive because web mercator is de facto standard for web mapping
+web_map_yscale = web_mercator_yscale
 # ***   END OF MATH   ************************************************************************** #
 
 
@@ -326,7 +349,7 @@ def get_maparray(bounds: tuple, tile: Tile="osm", z: int=None, use_cache:bool =T
         row = []
         for x in xs:
             url = tile.baseurl.format(x=x, y=y, z=z)
-            print(url, file=sys.stderr)
+            #print(url, file=sys.stderr)
             img = _get_tileimage(url, use_cache=use_cache)
             row.append(np.asarray(img))
         out.append(np.concatenate(row, axis=1))
@@ -339,7 +362,8 @@ def get_maparray(bounds: tuple, tile: Tile="osm", z: int=None, use_cache:bool =T
     extent = _get_extent(x1, x2, y1, y2, i1, i2, j1, j2, z)
     return out, extent
 
-def draw_map(bounds: tuple, tile: Tile="osm", z: int=None, aspect="auto", use_cache:bool =True, ax=None, **kwargs):
+def draw_map(bounds: tuple, tile: Tile="osm", z: int=None, aspect="auto",
+             use_cache:bool =True, ax=None, **kwargs):
     """
     Draw map on matlotlib axes.
 
@@ -368,9 +392,24 @@ def draw_map(bounds: tuple, tile: Tile="osm", z: int=None, aspect="auto", use_ca
     opts = {"extent": extent, "aspect": aspect}
     opts.update(kwargs)  # if extent is supplied, use it
     if ax is None:
-        ax = plt.imshow(array, **opts)
-        ax.axes.autoscale(enable=False)
-    else:
+        ax = plt.gca()
         #print(opts)
-        ax.imshow(array, **opts)
-        ax.autoscale(enable=False)
+    
+    # add another axes for showing the image
+    ax2 = ax.twinx()
+    ax_img = ax2.imshow(array, **opts)
+    ax2.yaxis.set_visible(False)
+
+    # move the main axes to the top layer and its patch invisible
+    ax.set_zorder(ax2.get_zorder() + 1)
+    ax.patch.set_visible(False)
+
+    # Then rescale the main axis to web-mercator scale
+    # with the same ylimit and aspect
+    yscale = web_mercator_yscale(bounds[1], bounds[3])
+    ax.set_ylim(extent[2], extent[3])
+    ax.set_aspect(aspect)
+    ax.set_yscale("function", functions=yscale)
+    
+    #ax.autoscale(enable=False)
+    return ax_img
