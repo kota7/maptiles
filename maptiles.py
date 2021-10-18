@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 import os
 import math
@@ -139,7 +139,7 @@ class _tiles:
         "Geospatial Information Authority of Japan, Pale",
         *_japangsi_copyright)
     japangsi_blank = Tile(
-        "https://cyberjapandata.gsi.go.jp/xyz/blank/{z}/{x}/{y}.png"
+        "https://cyberjapandata.gsi.go.jp/xyz/blank/{z}/{x}/{y}.png",
         "Geospatial Information Authority of Japan, Blank",
         *_japangsi_copyright)
 
