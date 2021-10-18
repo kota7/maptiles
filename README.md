@@ -166,6 +166,16 @@ Image.fromarray(img)
 from maptiles import predefined_tiles, get_tile
 
 list(predefined_tiles().keys())
+```
+
+    ['osm', 'osm_bw', 'osm_tonner', 'osm_tonner_hybrid', 'osm_tonner_labels',
+     'osm_tonner_lines', 'osm_tonner_background', 'osm_tonner_lite',
+     'japangsi', 'japangsi_pale', 'japangsi_blank',
+     'google', 'google_roads', 'google_streets', 'google_terrain', 'google_satellite', 'google_satellite_hybrid',
+     'google_h', 'google_r', 'google_t', 'google_s', 'google_y']
+
+
+```python
 get_tile("osm")
 ```
 
