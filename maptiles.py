@@ -108,16 +108,8 @@ class _tiles:
         "OpenStreetMap, Toner Lines",
         *_osm_copyright)
     osm_tonner_backgrounds = Tile(
-        "http://tile.stamen.com/toner-backgrounds/{z}/{x}/{y}.png", 
+        "http://tile.stamen.com/toner-background/{z}/{x}/{y}.png", 
         "OpenStreetMap, Toner Backgrounds",
-        *_osm_copyright)
-    osm_tonner_lite = Tile(
-        "http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png", 
-        "OpenStreetMap, Toner Lite",
-        *_osm_copyright)
-    osm_tonner_lite = Tile(
-        "http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png", 
-        "OpenStreetMap, Toner Lite",
         *_osm_copyright)
     osm_tonner_lite = Tile(
         "http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png", 
