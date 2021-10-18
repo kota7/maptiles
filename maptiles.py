@@ -107,7 +107,7 @@ class _tiles:
         "http://tile.stamen.com/toner-lines/{z}/{x}/{y}.png", 
         "OpenStreetMap, Toner Lines",
         *_osm_copyright)
-    osm_tonner_backgrounds = Tile(
+    osm_tonner_background = Tile(
         "http://tile.stamen.com/toner-background/{z}/{x}/{y}.png", 
         "OpenStreetMap, Toner Backgrounds",
         *_osm_copyright)
