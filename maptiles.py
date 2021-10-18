@@ -307,7 +307,7 @@ def _crs_from_str(s):
     else:
         raise ValueError("'%' is not supported CRS string" % s)
 
-def get_maparray(bounds: tuple, tile: _Tile="osm", z: int=None, extent_crs="lonlat", use_cache:bool =True)-> tuple:
+def get_maparray(bounds: tuple, tile: _Tile="osm", z: int=None, extent_crs="lonlat", use_cache:bool =True, verbose: int=1)-> tuple:
     """
     Draw map on matlotlib axes.
 
@@ -324,7 +324,7 @@ def get_maparray(bounds: tuple, tile: _Tile="osm", z: int=None, extent_crs="lonl
                      - "webmap", "web-mercator" or "epsg:3857" --> indices in EPSG:3857 system (Web Mercator)
         use_cache  : Bool. If True, map images stored in the internal database are used. This helps to reduce the
                     number of web requests to the map tile servers.
-        kwargs     : Optional arguments passed to ax.imshow() or plt.imshow()
+        verbose  : Int. 0: print no message, 1: print the auto-chozen zoom level, 2 or larger: show the url of the tiles
     
     Returns:
         Tuple of
@@ -349,7 +349,8 @@ def get_maparray(bounds: tuple, tile: _Tile="osm", z: int=None, extent_crs="lonl
     # make sure (lon1, lat1) is top-left, (lon2, lat2) is bottom-right
     if z is None:
         z = _auto_zoom(lon1, lon2)
-        print("Zoom level %d is chosen" % z, file=sys.stderr)
+        if verbose >= 1:
+            print("Zoom level %d is chosen" % z, file=sys.stderr)
 
     # find tiles of the corners
     (x1, y1, i1, j1) = _get_tile_index(lon1, lat1, z)
@@ -363,7 +364,8 @@ def get_maparray(bounds: tuple, tile: _Tile="osm", z: int=None, extent_crs="lonl
         row = []
         for x in xs:
             url = tile.baseurl.format(x=x, y=y, z=z)
-            #print(url, file=sys.stderr)
+            if verbose >= 2:
+                print(url, file=sys.stderr)
             img = _get_tileimage(url, use_cache=use_cache)
             row.append(np.asarray(img))
         out.append(np.concatenate(row, axis=1))
@@ -379,7 +381,7 @@ def get_maparray(bounds: tuple, tile: _Tile="osm", z: int=None, extent_crs="lonl
 
 def draw_map(bounds: tuple, tile: Tile="osm", z: int=None, aspect="auto",
              extent_crs="lonlat", scaling: bool=False,
-             use_cache:bool =True, ax=None, **kwargs)-> tuple:
+             use_cache:bool =True, verbose: int=1, ax=None, **kwargs)-> tuple:
     """
     Draw map on matlotlib axes.
 
@@ -401,6 +403,7 @@ def draw_map(bounds: tuple, tile: Tile="osm", z: int=None, aspect="auto",
                      - "webmap", "web-mercator" or "epsg:3857" --> indices in EPSG:3857 system (Web Mercator)
         use_cache: Bool. If True, map images stored in the internal database are used. This helps to reduce the
                     number of web requests to the map tile servers.
+        verbose  : Int. 0: print no message, 1: print the auto-chozen zoom level, 2 or larger: show the url of the tiles
         ax       : If given, map image is to drawn on this axes, and autoscale is disabled.
         kwargs   : Optional arguments passed to ax.imshow() or plt.imshow()
     
@@ -409,7 +412,7 @@ def draw_map(bounds: tuple, tile: Tile="osm", z: int=None, aspect="auto",
         - Axes object
         - AxesImage object
     """
-    array, extent = get_maparray(bounds, tile, z, use_cache=use_cache, extent_crs=extent_crs)
+    array, extent = get_maparray(bounds, tile, z, use_cache=use_cache, extent_crs=extent_crs, verbose=verbose)
     #print(extent)
     if "extent" in kwargs:
         extent = kwargs.pop("extent")
