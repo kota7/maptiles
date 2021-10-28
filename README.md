@@ -318,15 +318,15 @@ None
     y &= \frac{2^{z+7}}{\pi} \left(\pi - \mathrm{tanh}^{-1}(\mathrm{sin}\; \phi)\right)
     \end{align}
     $$
-    where $\lambda, \phi$ are longitude and latitude in radians, and $x, y$ are pixel indices on the web map images.
-- Since the latitude conversion is non-linear, simply plotting (lon, lat) as (x, y) coordinates may deviate from the map already in the Web Mercator scale.
+    where $\lambda, \phi$ are longitude and latitude in radians, and $x, y$ are pixel indices on the web map images. $z$ is the zoom level.
+- Since the latitude conversion is non-linear, simply plotting (lon, lat) as (x, y) coordinates would deviate from the map, since it is already in the Web Mercator scale.
 - We may think of following three strategies to this issue:
 
 |    | Strategy                                                  | Pros                                         | Cons                                                           | Parameters to draw_map         |
 |----|-----------------------------------------------------------|----------------------------------------------|----------------------------------------------------------------|---------------------|
-| 1. | Plot lon-lat as-is on the same axes as image              | Simple, works okay for small maps            | Points deviate for large maps                                  |                     |
-| 2. | Plot lon-lat on a separate axes with Web-Mercator scaling | Can plot with lon-lat, works for large maps  | Harder to modify visuals due to multi-layer structure          | `scaling=True`        |
-| 3. | Plot after projecting coordinates to Web Mercator scale   | Single layer structure, works for large maps | Extra step for manual projection, axis grids are not intuitive | `extent_crs="webmap"` |
+| 1. | Plot lon-lat as-is on the same axes as thase of the image              | Simple, works okay for small maps            | Points deviate for large maps                                  |                     |
+| 2. | Plot lon-lat on a separate axes with Web-Mercator scaling | Can use lon-lat without conversion, works for large maps  | Harder to modify visuals due to multi-layer structure          | `scaling=True`        |
+| 3. | Plot after projecting the lon-lat coordinates to the Web Mercator scale   | Single layer structure, works for large maps | Needs extra steps for manual projection, axis grids are not intuitive | `extent_crs="webmap"` |
 
 - Strategy 1 is a simple solution and is recommended if the map area is small and approximation is accepted.
 - Strategy 2 works for large maps and coding syntax stays simple. Customization of the visuals can be harder because the image and main plot objects are on separate layers (axes) that share the same bounds.
