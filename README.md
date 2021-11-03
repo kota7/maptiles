@@ -185,7 +185,7 @@ get_tile("osm")
     Tile(name='OpenStreetMap, Standard',
          baseurl='https://tile.openstreetmap.org/{z}/{x}/{y}.png',
          copyright='© OpenStreetMap contributors',
-         copywright_html='&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors')
+         copyright_html='&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors')
 
 
 
