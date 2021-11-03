@@ -20,5 +20,5 @@ setup(
     
     packages=[],
     py_modules=['maptiles'],
-    install_requires=['requests', 'pillow', 'numpy', 'matplotlib']
+    install_requires=['requests', 'pillow', 'numpy', 'matplotlib', 'pyproj']
 )
