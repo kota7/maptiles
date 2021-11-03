@@ -226,15 +226,15 @@ from IPython.core.display import HTML
 
 tile = get_tile("osm")
 print(tile.copyright)
-display(HTML(tile.copywright_html))
+display(HTML(tile.copyright_html))
 
 tile = get_tile("japangsi")
 print(tile.copyright)
-display(HTML(tile.copywright_html))
+display(HTML(tile.copyright_html))
 
 tile = get_tile("google")
 print(tile.copyright)
-display(HTML(tile.copywright_html))
+display(HTML(tile.copyright_html))
 ```
 
     © OpenStreetMap contributors
