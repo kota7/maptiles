@@ -72,9 +72,9 @@ def _get_tileimage(url: str, use_cache: bool=True)-> Image:
 
 
 # ***   TILES   **************************************************************************** #
-_Tile = namedtuple("Tile", "name baseurl copyright copywright_html")
+_Tile = namedtuple("Tile", "name baseurl copyright copyright_html")
 def Tile(baseurl, name=None, copyright=None, copyright_html=None):
-    return _Tile(name=name, baseurl=baseurl, copyright=copyright, copyright_html=copywright_html)
+    return _Tile(name=name, baseurl=baseurl, copyright=copyright, copyright_html=copyright_html)
 
 class _tiles:
 
