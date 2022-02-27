@@ -55,18 +55,18 @@ def _get_tileimage(url: str, use_cache: bool=True)-> Image:
     if r.status_code in (200, 201, 202):  # choice of success codes, can be arbitrary
         #print(r.status_code, url)
         img = Image.open(BytesIO(r.content)).convert("RGB")
+        # save to the database as bytes
+        with sqlite3.connect(config.dbfile) as conn:
+            c = conn.cursor()
+            q = """INSERT OR REPLACE INTO tiles VALUES (?,?)"""
+            c.execute(q, (url, img.tobytes()))
+            conn.commit()    
     else:
         warnings.warn("Failed to fetch tile image from {} with status code {}".format(
             url, r.status_code))
         # download failed, use white image
         img = Image.new("RGB", (256, 256), (255, 255, 255))
     
-    # save to the database as bytes
-    with sqlite3.connect(config.dbfile) as conn:
-        c = conn.cursor()
-        q = """INSERT OR REPLACE INTO tiles VALUES (?,?)"""
-        c.execute(q, (url, img.tobytes()))
-        conn.commit()    
     return img
 # ***   END OF DATABASE   ****************************************************************** #
 
