@@ -18,7 +18,7 @@ setup(
     long_description_content_type='text/markdown',
     url='https://github.com/kota7/maptiles',
     
-    packages=[],
-    py_modules=['maptiles'],
+    packages=['maptiles'],
+    #py_modules=[],
     install_requires=['requests', 'pillow', 'numpy', 'matplotlib', 'pyproj']
 )
