@@ -156,10 +156,10 @@ Image.fromarray(img)
 - This package defines a number of map tiles for the convenience.
 - The available tiles are given by the `predefined_tiles` function.
 - `get_tile` function returns the predefined tile object (a named tuple).
-- The `tile` option of `draw_map` and `get_maparray` accepts one of:
-    - Names of predefined tiles.
+- The `tile` option of `draw_map` and `get_maparray` accepts the followings:
+    - Name of a predefined tile.
     - URL string with `{z}`, `{x}`, `{y}` format parameters.
-    - Tile object.
+    - `Tile` object.
 
 
 ```python
@@ -439,7 +439,7 @@ The collected tile images are concatenated and cropped to form a single image as
 
 ### Database
 
-- Downloaded image data are stored at the internal SQLite database at `config.dbfile`. The default location is `~/maptiles.db`.
+- Downloaded image data are stored in the internal SQLite database at `config.dbfile`. The default location is `~/maptiles.db`.
 - By reusing the stored images, we reduce the number of requests to the map tile servers.
 - If you want to delete existing data, either run `initialize_database(replace=True)` or simply delete the file.
 - One may change the database file location by the `set_databasefile` function.
