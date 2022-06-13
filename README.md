@@ -2,7 +2,7 @@ maptiles
 ===========
 [![](https://badge.fury.io/py/maptiles.svg)](https://badge.fury.io/py/maptiles)
 
-Create map images and use as plot background.
+Plot on webmap backgrounds.
 
 
 ## Installation
