@@ -312,12 +312,14 @@ None
 - This package assumes that map tiles are [Web Mercator projected](https://en.wikipedia.org/wiki/Web_Mercator_projection).
 - The Web Mercator is a simplified version of Mercator projection and widely used by standard web maps currently, including the Google Map and OpenStreetMap.
 - The projection formula is the following:
+
     $$
     \begin{align}
     x &= \frac{2^{z+7}}{\pi} (\lambda + \pi) \\
-    y &= \frac{2^{z+7}}{\pi} \left(\pi - \mathrm{tanh}^{-1}(\mathrm{sin}\; \phi)\right)
+    y &= \frac{2^{z+7}}{\pi} \left(\pi - \mathrm{tanh}^{-1}(\mathrm{sin} \phi)\right)
     \end{align}
     $$
+    
     where $\lambda, \phi$ are longitude and latitude in radians, and $x, y$ are pixel indices on the web map images. $z$ is the zoom level.
 - Since the latitude conversion is non-linear, simply plotting (lon, lat) as (x, y) coordinates would deviate from the map, since it is already in the Web Mercator scale.
 - We may think of following three strategies to this issue:
