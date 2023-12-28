@@ -13,12 +13,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.scale import FuncScale
 import pyproj
-
 from . import __version__
 
 
 class config:
     dbfile = os.path.expanduser("~/maptiles.db")
+    stadiamaps_key = None
+
+    def set_stadiamaps_key(key: str):
+        config.stadiamaps_key = key
 
 
 def set_databasefile(filepath: str):
@@ -54,9 +57,19 @@ def _get_tileimage(url: str, use_cache: bool = True) -> Image:
                 img = Image.frombytes("RGB", (256, 256), b)
                 # map tile math depends on all tiles are 256x256.
                 return img
-
     # could not find the image in the database, so download from the server
-    headers = {"User-Agent": f"Maptiles/{__version__}"}
+
+    # create a user agent string
+    headers = {"User-Agent": f"Maptiles ({__version__})"}
+
+    if "stadiamaps.com" in url:
+        # add API key to the header
+        if config.stadiamaps_key is None:
+            raise ValueError(
+                "Stadia Maps API key is not set. Use config.set_stadiamaps_key() to set the key."
+            )
+        headers["Stadia-Auth"] = config.stadiamaps_key
+
     r = requests.get(url=url, headers=headers)
     if r.status_code in (200, 201, 202):  # choice of success codes, can be arbitrary
         # print(r.status_code, url)
@@ -73,6 +86,7 @@ def _get_tileimage(url: str, use_cache: bool = True) -> Image:
                 url, r.status_code
             )
         )
+
         # download failed, use white image
         img = Image.new("RGB", (256, 256), (255, 255, 255))
 
@@ -110,14 +124,15 @@ class _tiles:
         "OpenStreetMap, Black&White",
         *_osm_copyright,
     )
-    osm_tonner = Tile(
-        "http://tile.stamen.com/toner/{z}/{x}/{y}.png",
-        "OpenStreetMap, Toner",
-        *_osm_copyright,
-    )
+    
     osm_tonner_hybrid = Tile(
         "http://tile.stamen.com/toner-hybrid/{z}/{x}/{y}.png",
         "OpenStreetMap, Toner Hybrid",
+        *_osm_copyright,
+    )
+    osm_watercolor = Tile(
+        "https://tiles.stadiamaps.com/tiles/stamen_watercolor/{x}/{y}/{z}.png",
+        "OpenStreetMap, Watercolor",
         *_osm_copyright,
     )
     osm_tonner_labels = Tile(
@@ -139,6 +154,47 @@ class _tiles:
         "http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png",
         "OpenStreetMap, Toner Lite",
         *_osm_copyright,
+    )
+    osm_alidade_smooth_dark = Tile(
+        "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png",
+        "OpenStreetMap, Alidade Smooth Dark",
+        *_osm_copyright,
+    )
+
+    # Stadia Maps
+    # https://docs.stadiamaps.com/attribution/
+
+    _stadia_copyright = (
+        """\u00a9 Stadia Maps
+\u00a9 OpenMapTiles
+\u00a9 OpenStreetMap
+        """,
+        '''&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a>
+&copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a>
+&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>
+        '''
+    )
+
+    # Stadia Maps (stamen)
+    # https://docs.stadiamaps.com/attribution/
+
+    _stamen_copyright = (
+        """\u00a9 Stadia Maps
+\u00a9 OpenMapTiles
+\u00a9 OpenStreetMap
+\u00a9 Stamen Design
+        """,
+        '''&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a>
+&copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a>
+&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>
+&copy; <a href="https://stamen.com/" target="_blank">Stamen Design</a>
+        '''
+    )
+
+    stamen_tonner = Tile(
+        "https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}.png",
+        "OpenStreetMap, Toner",
+        *_stamen_copyright,
     )
 
     # Geospatial Information Authority of Japan
