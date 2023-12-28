@@ -119,48 +119,7 @@ class _tiles:
         "OpenStreetMap, Standard",
         *_osm_copyright,
     )
-    osm_bw = Tile(
-        "http://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png",
-        "OpenStreetMap, Black&White",
-        *_osm_copyright,
-    )
     
-    osm_tonner_hybrid = Tile(
-        "http://tile.stamen.com/toner-hybrid/{z}/{x}/{y}.png",
-        "OpenStreetMap, Toner Hybrid",
-        *_osm_copyright,
-    )
-    osm_watercolor = Tile(
-        "https://tiles.stadiamaps.com/tiles/stamen_watercolor/{x}/{y}/{z}.png",
-        "OpenStreetMap, Watercolor",
-        *_osm_copyright,
-    )
-    osm_tonner_labels = Tile(
-        "http://tile.stamen.com/toner-labels/{z}/{x}/{y}.png",
-        "OpenStreetMap, Toner Labels",
-        *_osm_copyright,
-    )
-    osm_tonner_lines = Tile(
-        "http://tile.stamen.com/toner-lines/{z}/{x}/{y}.png",
-        "OpenStreetMap, Toner Lines",
-        *_osm_copyright,
-    )
-    osm_tonner_background = Tile(
-        "http://tile.stamen.com/toner-background/{z}/{x}/{y}.png",
-        "OpenStreetMap, Toner Backgrounds",
-        *_osm_copyright,
-    )
-    osm_tonner_lite = Tile(
-        "http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png",
-        "OpenStreetMap, Toner Lite",
-        *_osm_copyright,
-    )
-    osm_alidade_smooth_dark = Tile(
-        "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png",
-        "OpenStreetMap, Alidade Smooth Dark",
-        *_osm_copyright,
-    )
-
     # Stadia Maps
     # https://docs.stadiamaps.com/attribution/
 
@@ -173,6 +132,30 @@ class _tiles:
 &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a>
 &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>
         '''
+    )
+
+    stadia_alidade_smooth_dark = Tile(
+        "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png",
+        "Stadia Maps, Alidade Smooth Dark",
+        *_stadia_copyright,
+    )
+
+    stadia_alidade_smooth = Tile(
+        "https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}.png",
+        "Stadia Maps, Alidade Smooth",
+        *_stadia_copyright,
+    )
+
+    stadia_outdoors = Tile(
+        "https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}.png",
+        "Stadia Maps, Outdoors",
+        *_stadia_copyright,
+    )
+
+    stadia_osm_bright = Tile(
+        "https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}.png",
+        "Stadia Maps, OSM Bright",
+        *_stadia_copyright,
     )
 
     # Stadia Maps (stamen)
@@ -193,7 +176,19 @@ class _tiles:
 
     stamen_tonner = Tile(
         "https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}.png",
-        "OpenStreetMap, Toner",
+        "Stadia Maps, Stamen Toner",
+        *_stamen_copyright,
+    )
+
+    stamen_terrain = Tile(
+        "https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}.png",
+        "Stadia Maps, Stamen Terrain",
+        *_stamen_copyright,
+    )
+
+    stamen_watercolor = Tile(
+        "https://tiles.stadiamaps.com/tiles/stamen_watercolor/{x}/{y}/{z}.png",
+        "Stadia Maps, Stamen Watercolor",
         *_stamen_copyright,
     )
 
