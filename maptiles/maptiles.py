@@ -54,9 +54,9 @@ def _get_tileimage(url: str, use_cache: bool = True) -> Image:
                 img = Image.frombytes("RGB", (256, 256), b)
                 # map tile math depends on all tiles are 256x256.
                 return img
-    
+
     # could not find the image in the database, so download from the server
-    headers = {"User-Agent": f"Maptiles ({__version__})"}
+    headers = {"User-Agent": f"Maptiles/{__version__}"}
     r = requests.get(url=url, headers=headers)
     if r.status_code in (200, 201, 202):  # choice of success codes, can be arbitrary
         # print(r.status_code, url)
