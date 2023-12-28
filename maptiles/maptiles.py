@@ -14,6 +14,8 @@ import matplotlib.pyplot as plt
 from matplotlib.scale import FuncScale
 import pyproj
 
+from . import __version__
+
 
 class config:
     dbfile = os.path.expanduser("~/maptiles.db")
@@ -52,8 +54,10 @@ def _get_tileimage(url: str, use_cache: bool = True) -> Image:
                 img = Image.frombytes("RGB", (256, 256), b)
                 # map tile math depends on all tiles are 256x256.
                 return img
+    
     # could not find the image in the database, so download from the server
-    r = requests.get(url)
+    headers = {"User-Agent": f"Maptiles ({__version__})"}
+    r = requests.get(url=url, headers=headers)
     if r.status_code in (200, 201, 202):  # choice of success codes, can be arbitrary
         # print(r.status_code, url)
         img = Image.open(BytesIO(r.content)).convert("RGB")
@@ -99,42 +103,42 @@ class _tiles:
     osm = Tile(
         "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
         "OpenStreetMap, Standard",
-        *_osm_copyright
+        *_osm_copyright,
     )
     osm_bw = Tile(
         "http://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png",
         "OpenStreetMap, Black&White",
-        *_osm_copyright
+        *_osm_copyright,
     )
     osm_tonner = Tile(
         "http://tile.stamen.com/toner/{z}/{x}/{y}.png",
         "OpenStreetMap, Toner",
-        *_osm_copyright
+        *_osm_copyright,
     )
     osm_tonner_hybrid = Tile(
         "http://tile.stamen.com/toner-hybrid/{z}/{x}/{y}.png",
         "OpenStreetMap, Toner Hybrid",
-        *_osm_copyright
+        *_osm_copyright,
     )
     osm_tonner_labels = Tile(
         "http://tile.stamen.com/toner-labels/{z}/{x}/{y}.png",
         "OpenStreetMap, Toner Labels",
-        *_osm_copyright
+        *_osm_copyright,
     )
     osm_tonner_lines = Tile(
         "http://tile.stamen.com/toner-lines/{z}/{x}/{y}.png",
         "OpenStreetMap, Toner Lines",
-        *_osm_copyright
+        *_osm_copyright,
     )
     osm_tonner_background = Tile(
         "http://tile.stamen.com/toner-background/{z}/{x}/{y}.png",
         "OpenStreetMap, Toner Backgrounds",
-        *_osm_copyright
+        *_osm_copyright,
     )
     osm_tonner_lite = Tile(
         "http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png",
         "OpenStreetMap, Toner Lite",
-        *_osm_copyright
+        *_osm_copyright,
     )
 
     # Geospatial Information Authority of Japan
@@ -147,17 +151,17 @@ class _tiles:
     japangsi = Tile(
         "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png",
         "Geospatial Information Authority of Japan, Standard",
-        *_japangsi_copyright
+        *_japangsi_copyright,
     )
     japangsi_pale = Tile(
         "https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png",
         "Geospatial Information Authority of Japan, Pale",
-        *_japangsi_copyright
+        *_japangsi_copyright,
     )
     japangsi_blank = Tile(
         "https://cyberjapandata.gsi.go.jp/xyz/blank/{z}/{x}/{y}.png",
         "Geospatial Information Authority of Japan, Blank",
-        *_japangsi_copyright
+        *_japangsi_copyright,
     )
 
     # Google Maps
@@ -169,32 +173,32 @@ class _tiles:
     google = Tile(
         "https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}",
         "Google Map",
-        *_google_copyright
+        *_google_copyright,
     )
     google_roads = Tile(
         "https://mt1.google.com/vt/lyrs=h&x={x}&y={y}&z={z}",
         "Google Map, Road",
-        *_google_copyright
+        *_google_copyright,
     )
     google_streets = Tile(
         "https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}",
         "Google Map, Streets",
-        *_google_copyright
+        *_google_copyright,
     )
     google_terrain = Tile(
         "https://mt1.google.com/vt/lyrs=t&x={x}&y={y}&z={z}",
         "Google Map, Terrain",
-        *_google_copyright
+        *_google_copyright,
     )
     google_satellite = Tile(
         "https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
         "Google Map, Satellite",
-        *_google_copyright
+        *_google_copyright,
     )
     google_satellite_hybrid = Tile(
         "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
         "Google Map, Satellite Hybrid",
-        *_google_copyright
+        *_google_copyright,
     )
     # alias
     google_h = google_roads
@@ -462,7 +466,7 @@ def draw_map(
     use_cache: bool = True,
     verbose: int = 1,
     ax=None,
-    **kwargs
+    **kwargs,
 ) -> tuple:
     """
     Draw map on matlotlib axes.
