@@ -187,7 +187,7 @@ class _tiles:
     )
 
     stamen_watercolor = Tile(
-        "https://tiles.stadiamaps.com/tiles/stamen_watercolor/{x}/{y}/{z}.png",
+        "https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg",
         "Stadia Maps, Stamen Watercolor",
         *_stamen_copyright,
     )
