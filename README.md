@@ -217,7 +217,7 @@ draw_map(bounds, ax=ax[0], tile="google_streets")   # tile name
 ax[0].set_title("Google Street")
 
 draw_map(bounds, ax=ax[1], tile=get_tile("google_satellite")) # tile object
-ax[1].set_title("Stamen Watercolor")
+ax[1].set_title("Google Satellite")
 fig.tight_layout()
 None
 ```
@@ -471,4 +471,3 @@ print(config.dbfile)
 ```
 
     ./temp.db
-
