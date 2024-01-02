@@ -340,6 +340,7 @@ None
     where $\lambda, \phi$ are longitude and latitude in radians, and $x, y$ are pixel indices on the web map images.
 - Since the latitude conversion is non-linear, simply plotting (lon, lat) as (x, y) coordinates may deviate from the map already in the Web Mercator scale.
 - We may think of following three strategies to this issue:
+
 |    | Strategy                                                  | Pros                                         | Cons                                                           | Parameters to draw_map         |
 |----|-----------------------------------------------------------|----------------------------------------------|----------------------------------------------------------------|---------------------|
 | 1. | Plot lon-lat as-is on the same axes as image              | Simple, works okay for small maps            | Points deviate for large maps                                  |                     |
