@@ -54,7 +54,7 @@ None
 
 
     
-![png](README_files/example_3_1.png)
+![png](README_files/example_4_1.png)
     
 
 
@@ -87,7 +87,7 @@ None
 
 
     
-![png](README_files/example_4_1.png)
+![png](README_files/example_5_1.png)
     
 
 
@@ -111,7 +111,7 @@ None
 
 
     
-![png](README_files/example_5_1.png)
+![png](README_files/example_6_1.png)
     
 
 
@@ -144,7 +144,7 @@ Image.fromarray(img)
 
 
     
-![png](README_files/example_7_2.png)
+![png](README_files/example_8_2.png)
     
 
 
@@ -168,11 +168,33 @@ from maptiles import predefined_tiles, get_tile
 list(predefined_tiles().keys())
 ```
 
-    ['osm', 'osm_bw', 'osm_tonner', 'osm_tonner_hybrid', 'osm_tonner_labels',
-     'osm_tonner_lines', 'osm_tonner_background', 'osm_tonner_lite',
-     'japangsi', 'japangsi_pale', 'japangsi_blank',
-     'google', 'google_roads', 'google_streets', 'google_terrain', 'google_satellite', 'google_satellite_hybrid',
-     'google_h', 'google_r', 'google_t', 'google_s', 'google_y']
+
+
+
+    ['osm',
+     'stadia_alidade_smooth_dark',
+     'stadia_alidade_smooth',
+     'stadia_outdoors',
+     'stadia_osm_bright',
+     'stamen_tonner',
+     'stamen_terrain',
+     'stamen_watercolor',
+     'japangsi',
+     'japangsi_pale',
+     'japangsi_blank',
+     'google',
+     'google_roads',
+     'google_streets',
+     'google_terrain',
+     'google_satellite',
+     'google_satellite_hybrid',
+     'google_h',
+     'google_r',
+     'google_t',
+     'google_s',
+     'google_y']
+
+
 
 
 ```python
@@ -182,10 +204,7 @@ get_tile("osm")
 
 
 
-    Tile(name='OpenStreetMap, Standard',
-         baseurl='https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-         copyright='© OpenStreetMap contributors',
-         copyright_html='&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors')
+    Tile(name='OpenStreetMap, Standard', baseurl='https://tile.openstreetmap.org/{z}/{x}/{y}.png', copyright='© OpenStreetMap contributors', copyright_html='&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors')
 
 
 
@@ -197,8 +216,8 @@ fig, ax = plt.subplots(1, 2, figsize=(13, 6))
 draw_map(bounds, ax=ax[0], tile="google_streets")   # tile name
 ax[0].set_title("Google Street")
 
-draw_map(bounds, ax=ax[1], tile=get_tile("osm_bw")) # tile object
-ax[1].set_title("OpenStreetMap Black&White")
+draw_map(bounds, ax=ax[1], tile=get_tile("google_satellite")) # tile object
+ax[1].set_title("Stamen Watercolor")
 fig.tight_layout()
 None
 ```
@@ -209,7 +228,7 @@ None
 
 
     
-![png](README_files/example_10_1.png)
+![png](README_files/example_12_1.png)
     
 
 
@@ -275,7 +294,7 @@ None
 
 
     
-![png](README_files/example_13_1.png)
+![png](README_files/example_15_1.png)
     
 
 
@@ -303,7 +322,7 @@ None
 
 
     
-![png](README_files/example_15_1.png)
+![png](README_files/example_17_1.png)
     
 
 
@@ -312,27 +331,23 @@ None
 - This package assumes that map tiles are [Web Mercator projected](https://en.wikipedia.org/wiki/Web_Mercator_projection).
 - The Web Mercator is a simplified version of Mercator projection and widely used by standard web maps currently, including the Google Map and OpenStreetMap.
 - The projection formula is the following:
-
     $$
     \begin{align}
     x &= \frac{2^{z+7}}{\pi} (\lambda + \pi) \\
-    y &= \frac{2^{z+7}}{\pi} \left(\pi - \mathrm{tanh}^{-1}(\mathrm{sin} \phi)\right)
+    y &= \frac{2^{z+7}}{\pi} \left(\pi - \mathrm{tanh}^{-1}(\mathrm{sin}\; \phi)\right)
     \end{align}
     $$
-    
-    where $\lambda, \phi$ are longitude and latitude in radians, and $x, y$ are pixel indices on the web map images. $z$ is the zoom level.
-- Since the latitude conversion is non-linear, simply plotting (lon, lat) as (x, y) coordinates would deviate from the map, since it is already in the Web Mercator scale.
+    where $\lambda, \phi$ are longitude and latitude in radians, and $x, y$ are pixel indices on the web map images.
+- Since the latitude conversion is non-linear, simply plotting (lon, lat) as (x, y) coordinates may deviate from the map already in the Web Mercator scale.
 - We may think of following three strategies to this issue:
-
 |    | Strategy                                                  | Pros                                         | Cons                                                           | Parameters to draw_map         |
 |----|-----------------------------------------------------------|----------------------------------------------|----------------------------------------------------------------|---------------------|
-| 1. | Plot lon-lat as-is on the same axes as thase of the image              | Simple, works okay for small maps            | Points deviate for large maps                                  |                     |
-| 2. | Plot lon-lat on a separate axes with Web-Mercator scaling | Can use lon-lat without conversion, works for large maps  | Harder to modify visuals due to multi-layer structure          | `scaling=True`        |
-| 3. | Plot after projecting the lon-lat coordinates to the Web Mercator scale   | Single layer structure, works for large maps | Needs extra steps for manual projection, axis grids are not intuitive | `extent_crs="webmap"` |
-
-- Strategy 1 is a simple solution and is recommended if the map area is small and approximation is accepted.
-- Strategy 2 works for large maps and coding syntax stays simple. Customization of the visuals can be harder because the image and main plot objects are on separate layers (axes) that share the same bounds.
-- Strategy 3 also works for large maps. Manual projection can be easily conducted using [pyproj](https://pypi.org/project/pyproj/) or [geopandas](https://pypi.org/project/geopandas/) libraries. The axis ticks are not intuitive, but one may add grid lines manually to achieve the desired visuals.
+| 1. | Plot lon-lat as-is on the same axes as image              | Simple, works okay for small maps            | Points deviate for large maps                                  |                     |
+| 2. | Plot lon-lat on a separate axes with Web-Mercator scaling | Can plot with lon-lat, works for large maps  | Harder to modify visuals due to multi-layer structure          | `scaling=True`        |
+| 3. | Plot after projecting coordinates to Web Mercator scale   | Single layer structure, works for large maps | Extra step for manual projection, axis grids are not intuitive | `extent_crs="webmap"` |
+    - Strategy 1 is a simple solution and is recommended if the map area is small and approximation is accepted.
+    - Strategy 2 works for large maps and coding syntax stays simple. Customization of the visuals can be harder because the image and main plot objects are on separate layers (axes) that share the same bounds.
+    - Strategy 3 also works for large maps. Manual projection can be easily conducted using [pyproj](https://pypi.org/project/pyproj/) or [geopandas](https://pypi.org/project/geopandas/) libraries. The axis ticks are not intuitive, but one may add grid lines manually to achieve the desired visuals.
 - Examples below show how these strategies work on a small and a large map area.
 
 
@@ -377,7 +392,7 @@ fig.tight_layout()
 
 
     
-![png](README_files/example_17_1.png)
+![png](README_files/example_19_1.png)
     
 
 
@@ -419,25 +434,11 @@ fig.tight_layout()
 
 
     
-![png](README_files/example_18_2.png)
+![png](README_files/example_20_2.png)
     
 
+
 ## Implementation details
-
-
-### Coordinate Projection
-
-#### (longitude, latitude) to (Pixel Index)
-
-Longitude and latitude are converted to pixel index by the following formulas.
-
-```
-lonToPixel(x) = 2^(z+7) * (x/180 + 1)
-latToPixel(y) = 2^(z+7)/pi * ( -atanh(sin(pi*y/180)) + atanh(sin(pi*L/180)) )
-```
-
-These pixel indices are used to find the tile images corresponding to the coordinates, and also identify the locations within the image.
-The collected tile images are concatenated and cropped to form a single image as close as possible to the desired area.
 
 ### Database
 
@@ -459,16 +460,7 @@ with sqlite3.connect(config.dbfile) as conn:
 print(data)
 ```
 
-    [('http://tiles.wmflabs.org/bw-mapnik/15/16383/10900.png',),
-     ('http://tiles.wmflabs.org/bw-mapnik/15/16383/10901.png',),
-     ('http://tiles.wmflabs.org/bw-mapnik/15/16384/10900.png',),
-     ('http://tiles.wmflabs.org/bw-mapnik/15/16384/10901.png',),
-     ('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/11/1812/807.jpg',),
-     ('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/11/1812/808.jpg',),
-     ('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/11/1812/809.jpg',),
-     ('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/11/1813/807.jpg',),
-     ('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/11/1813/808.jpg',),
-     ('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/11/1813/809.jpg',)]
+    [('https://cyberjapandata.gsi.go.jp/xyz/english/11/1812/807.png',), ('https://cyberjapandata.gsi.go.jp/xyz/english/11/1812/808.png',), ('https://cyberjapandata.gsi.go.jp/xyz/english/11/1812/809.png',), ('https://cyberjapandata.gsi.go.jp/xyz/english/11/1813/807.png',), ('https://cyberjapandata.gsi.go.jp/xyz/english/11/1813/808.png',), ('https://cyberjapandata.gsi.go.jp/xyz/english/11/1813/809.png',), ('https://cyberjapandata.gsi.go.jp/xyz/english/11/1814/807.png',), ('https://cyberjapandata.gsi.go.jp/xyz/english/11/1814/808.png',), ('https://cyberjapandata.gsi.go.jp/xyz/english/11/1814/809.png',), ('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/11/1812/807.jpg',)]
 
 
 
@@ -479,3 +471,4 @@ print(config.dbfile)
 ```
 
     ./temp.db
+
