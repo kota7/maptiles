@@ -1,6 +1,7 @@
 maptiles
 ===========
 [![](https://badge.fury.io/py/maptiles.svg)](https://badge.fury.io/py/maptiles)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/kota7/maptiles)
 
 Plot on webmap backgrounds.
 
